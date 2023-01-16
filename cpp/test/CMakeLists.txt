@@ -1,1 +1,1 @@
-add_executable(test_map.cpp test_map)
+add_executable(test_map test_map.cpp)

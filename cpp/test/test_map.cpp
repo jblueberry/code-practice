@@ -1,14 +1,12 @@
 #include "map.h"
+#include <optional>
+#include <cassert>
 
-template <class K, class V>
-class MapImpl : public junhui::Map<K, V>
-{
-    // using KV = std::pair<K, V>;
-public:
-    std::optional<V> Lookup(const K &key) { return std::nullopt; }
-    void Update(const KV &kv) {}
-};
 int main()
 {
-    MapImpl<int, int> map;
+    junhui::StdMap<int, int> map;
+    // runtime assert
+    assert(map.Lookup(1) == std::nullopt);
+    map.Update(1, 2);
+    assert(map.Lookup(1) == 2);
 }
