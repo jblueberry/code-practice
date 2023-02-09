@@ -3,7 +3,6 @@
 
 #include <future>
 #include <functional>
-#include <iostream>
 
 template <typename F, typename... Args>
 auto submit(F &&f, Args &&...args) -> std::pair<std::function<void()>, std::future<decltype(f(args...))>>
