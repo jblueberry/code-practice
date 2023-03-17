@@ -1,0 +1,4 @@
+# set the environment for c++ 20
+env = Environment(CXXFLAGS = '-std=c++20')
+env.Program("bst_test.cpp")
+env.Program("rbtree_test.cpp")
