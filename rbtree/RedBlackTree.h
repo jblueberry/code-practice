@@ -2,9 +2,22 @@
 #include <concepts>
 #include <cassert>
 #include "BinaryTree.h"
+#include <stdint.h>
+
+#define assertm(exp, msg) assert(((void)(msg), exp))
 
 namespace daniel
 {
+
+    static inline uint32_t log2(const uint32_t x)
+    {
+        uint32_t y;
+        asm("\tbsr %1, %0\n"
+            : "=r"(y)
+            : "r"(x));
+        return y;
+    }
+
     template <std::totally_ordered T>
     class RedBlackTree : public BinaryTree<T>
     {
@@ -22,22 +35,22 @@ namespace daniel
         Pointer root = nullptr;
         size_t size = 0;
 
-        bool IsLeftChild(auto node) const
+        inline bool IsLeftChild(auto node) const
         {
             return node->parent->left == node;
         }
 
-        Pointer ParentOf(auto node) const
+        inline Pointer ParentOf(auto node) const
         {
             return node->parent;
         }
 
-        Pointer GrandparentOf(auto node) const
+        inline Pointer GrandparentOf(auto node) const
         {
             return ParentOf(node)->parent;
         }
 
-        Pointer UncleOf(auto node) const
+        inline Pointer UncleOf(auto node) const
         {
             auto parent = ParentOf(node);
             if (IsLeftChild(parent))
@@ -46,27 +59,24 @@ namespace daniel
                 return GrandparentOf(node)->left;
         }
 
-        void InsertCase1(auto node)
+        inline void InsertCase1(auto node)
         {
-
             if (ParentOf(node) == nullptr)
                 node->isRed = false;
             else
                 InsertCase2(node);
         }
 
-        void InsertCase2(auto node)
+        inline void InsertCase2(auto node)
         {
-
             if (ParentOf(node)->isRed == false)
                 return;
             else
                 InsertCase3(node);
         }
 
-        void InsertCase3(auto node)
+        inline void InsertCase3(auto node)
         {
-
             auto uncle = UncleOf(node);
             auto parent = ParentOf(node);
             auto grandparent = GrandparentOf(node);
@@ -81,9 +91,8 @@ namespace daniel
                 InsertCase4(node);
         }
 
-        void InsertCase4(auto node)
+        inline void InsertCase4(auto node)
         {
-
             // here we know that the parent is red, but the uncle is black or null
             auto parent = ParentOf(node);
             auto grandparent = GrandparentOf(node);
@@ -109,9 +118,8 @@ namespace daniel
             InsertCase5(node);
         }
 
-        void RotateLeft(auto node)
+        inline void RotateLeft(auto node)
         {
-
             // here node is the right child of parent, and parent is the left child of grandparent
             auto parent = ParentOf(node);
             auto grandparent = GrandparentOf(node);
@@ -128,14 +136,19 @@ namespace daniel
             // set grandparent's left child to node
             if (grandparent == nullptr)
                 root = node;
-            else
+            else if (grandparent->left == parent)
+            {
                 grandparent->left = node;
+            }
+            else
+            {
+                grandparent->right = node;
+            }
             node->parent = grandparent;
         }
 
-        void RotateRight(auto node)
+        inline void RotateRight(auto node)
         {
-
             // here node is the left child of parent, and parent is the right child of grandparent
             auto parent = ParentOf(node);
             auto grandparent = GrandparentOf(node);
@@ -149,14 +162,19 @@ namespace daniel
 
             if (grandparent == nullptr)
                 root = node;
+            else if (grandparent->left == parent)
+            {
+                grandparent->left = node;
+            }
             else
+            {
                 grandparent->right = node;
+            }
             node->parent = grandparent;
         }
 
-        void InsertCase5(auto node)
+        inline void InsertCase5(auto node)
         {
-
             auto parent = ParentOf(node);
             auto grandparent = GrandparentOf(node);
 
@@ -175,13 +193,56 @@ namespace daniel
                 RotateLeft(parent);
         }
 
+        inline void CheckColors(auto node)
+        {
+            if (node == nullptr)
+                return;
+            if (node == root)
+                assert(node->isRed == false);
+            if (node->isRed)
+            {
+                if (node->left)
+                    assert(node->left->isRed == false);
+                if (node->right)
+                    assert(node->right->isRed == false);
+            }
+            CheckColors(node->left);
+            CheckColors(node->right);
+        }
+
+        inline int CheckBlackNodeNumber(auto node)
+        {
+            if (node == nullptr)
+                return 1;
+            auto left = CheckBlackNodeNumber(node->left);
+            auto right = CheckBlackNodeNumber(node->right);
+            assert(left == right);
+            if (node->isRed)
+                return left;
+            else
+                return left + 1;
+        }
+
+        inline int Height(auto node)
+        {
+            if (node == nullptr)
+                return 0;
+            return std::max(Height(node->left), Height(node->right)) + 1;
+        }
+
+        inline void CheckRedBlackTree()
+        {
+            CheckColors(root);
+            CheckBlackNodeNumber(root);
+            assertm(Height(root) <= 2 * log2(size + 1), "Height is too big");
+        }
+
     public:
         RedBlackTree() = default;
         ~RedBlackTree() = default;
 
         bool Insert(T value) override
         {
-
             Pointer parent = nullptr;
             auto pos = root;
             while (pos != nullptr)
@@ -205,6 +266,7 @@ namespace daniel
                 parent->right = newNode;
             ++size;
             InsertCase1(newNode);
+            CheckRedBlackTree();
             return true;
         }
 
@@ -238,6 +300,108 @@ namespace daniel
             }
             return false;
         }
+
+        void Clear()
+        {
+            root = nullptr;
+            size = 0;
+        }
+
+        T *const Find(T value) const
+        {
+            auto pos = root;
+            while (pos != nullptr)
+            {
+                if (value < pos->value)
+                    pos = pos->left;
+                else if (value > pos->value)
+                    pos = pos->right;
+                else
+                    return &pos->value;
+            }
+            return nullptr;
+        }
     };
 
+    template <std::totally_ordered Key, typename Value>
+    class OrderedMap
+    {
+    public:
+        using KeyType = Key;
+        using ValueType = Value;
+
+    private:
+        struct TreeEntry
+        {
+            KeyType key;
+            ValueType value;
+            TreeEntry(KeyType key, ValueType value) : key(key), value(value) {}
+
+            // for RedBlackTree to compare
+            bool operator<(const TreeEntry &other) const
+            {
+                return key < other.key;
+            }
+
+            bool operator>(const TreeEntry &other) const
+            {
+                return key > other.key;
+            }
+
+            bool operator==(const TreeEntry &other) const
+            {
+                return key == other.key;
+            }
+
+            bool operator!=(const TreeEntry &other) const
+            {
+                return key != other.key;
+            }
+
+            bool operator<=(const TreeEntry &other) const
+            {
+                return key <= other.key;
+            }
+
+            bool operator>=(const TreeEntry &other) const
+            {
+                return key >= other.key;
+            }
+        };
+
+        RedBlackTree<TreeEntry> tree;
+
+    public:
+        bool Put(KeyType key, ValueType value)
+        {
+            if (tree.Insert(TreeEntry(key, value)))
+            {
+                return true;
+            }
+            else
+            {
+                auto it = tree.Find(TreeEntry(key, value));
+                assertm(it != nullptr, "it should not be null");
+                it->value = value;
+                return true;
+            }
+        }
+
+        const ValueType &Get(KeyType key) const
+        {
+            auto it = tree.Find(TreeEntry(key, ValueType()));
+            assertm(it != nullptr, "it should not be null");
+            return it->value;
+        }
+
+        bool Contains(KeyType key) const
+        {
+            return tree.Contains(TreeEntry(key, ValueType()));
+        }
+
+        bool Remove(KeyType key)
+        {
+            return tree.Remove(TreeEntry(key, ValueType()));
+        }
+    };
 }

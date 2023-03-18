@@ -4,6 +4,11 @@
 #include <random>
 #include "TreeUtils.h"
 
+struct NonOrderable
+{
+    int value;
+};
+
 int main()
 {
     using RBTree = daniel::RedBlackTree<int>;
@@ -13,8 +18,8 @@ int main()
     std::vector<int> numbers;
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::uniform_int_distribution<> dis(0, 1000);
-    for (int i = 0; i < 100; ++i)
+    std::uniform_int_distribution<> dis(0, 10000);
+    for (int i = 0; i < 1000; ++i)
     {
         numbers.push_back(dis(gen));
     }
@@ -48,4 +53,17 @@ int main()
     {
         std::cout << "This is not a BST" << std::endl;
     }
+
+    daniel::OrderedMap<int, std::string> map;
+    map.Put(1, "1");
+    map.Put(2, "3");
+
+    std::cout << map.Get(1) << std::endl;
+    std::cout << map.Get(2) << std::endl;
+
+    map.Put(1, "hello world");
+    std::cout << map.Get(1) << std::endl;
+
+
+    daniel::OrderedMap<NonOrderable, int> map2;
 }
