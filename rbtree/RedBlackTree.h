@@ -8,7 +8,6 @@
 
 namespace daniel
 {
-
     static inline uint32_t log2(const uint32_t x)
     {
         uint32_t y;
@@ -237,6 +236,37 @@ namespace daniel
             assertm(Height(root) <= 2 * log2(size + 1), "Height is too big");
         }
 
+        inline Pointer GetMin(auto node) const
+        {
+            assertm(node != nullptr, "Tree is empty");
+            if (node->left == nullptr)
+                return node;
+            return GetMin(node->left);
+        }
+
+        inline Pointer GetMax(auto node) const
+        {
+            assertm(node != nullptr, "Tree is empty");
+            if (node->right == nullptr)
+                return node;
+            return GetMax(node->right);
+        }
+
+        inline Pointer Find(const T &value) const
+        {
+            auto pos = root;
+            while (pos != nullptr)
+            {
+                if (value < pos->value)
+                    pos = pos->left;
+                else if (value > pos->value)
+                    pos = pos->right;
+                else
+                    return pos;
+            }
+            return nullptr;
+        }
+
     public:
         RedBlackTree() = default;
         ~RedBlackTree() = default;
@@ -271,9 +301,18 @@ namespace daniel
         }
 
         // TODO
-        bool Remove(T value) override
+        bool Remove(const T &value) override
         {
-            return true;
+            auto pos = Find(value);
+            if (pos == nullptr)
+                return false;
+
+            if (pos->left != nullptr && pos->right != nullptr)
+            {
+                auto successor = GetMin(pos->right);
+                pos->value = successor->value;
+                pos = successor;
+            }
         }
 
         size_t Size() const override
@@ -286,7 +325,7 @@ namespace daniel
             return size == 0;
         }
 
-        bool Contains(T value) const override
+        bool Contains(const T &value) const override
         {
             auto pos = root;
             while (pos != nullptr)
@@ -327,15 +366,14 @@ namespace daniel
     class OrderedMap
     {
     public:
-        using KeyType = Key;
-        using ValueType = Value;
+        using ValuePointerType = std::shared_ptr<Value>;
 
     private:
         struct TreeEntry
         {
-            KeyType key;
-            ValueType value;
-            TreeEntry(KeyType key, ValueType value) : key(key), value(value) {}
+            Key key;
+            ValuePointerType value;
+            TreeEntry(Key key, ValuePointerType value) : key(key), value(value) {}
 
             // for RedBlackTree to compare
             bool operator<(const TreeEntry &other) const
@@ -372,36 +410,37 @@ namespace daniel
         RedBlackTree<TreeEntry> tree;
 
     public:
-        bool Put(KeyType key, ValueType value)
+        bool Put(Key key, Value value)
         {
-            if (tree.Insert(TreeEntry(key, value)))
+
+            if (tree.Insert(TreeEntry(key, std::make_shared<Value>(value))))
             {
                 return true;
             }
             else
             {
-                auto it = tree.Find(TreeEntry(key, value));
+                auto it = tree.Find(TreeEntry(key, nullptr));
                 assertm(it != nullptr, "it should not be null");
-                it->value = value;
+                it->value = std::make_shared<Value>(value);
                 return true;
             }
         }
 
-        const ValueType &Get(KeyType key) const
+        const Value &Get(Key key) const
         {
-            auto it = tree.Find(TreeEntry(key, ValueType()));
+            auto it = tree.Find(TreeEntry(key, nullptr));
             assertm(it != nullptr, "it should not be null");
-            return it->value;
+            return *it->value;
         }
 
-        bool Contains(KeyType key) const
+        bool Contains(Key key) const
         {
-            return tree.Contains(TreeEntry(key, ValueType()));
+            return tree.Contains(TreeEntry(key, nullptr));
         }
 
-        bool Remove(KeyType key)
+        bool Remove(Key key)
         {
-            return tree.Remove(TreeEntry(key, ValueType()));
+            return tree.Remove(TreeEntry(key, nullptr));
         }
     };
 }

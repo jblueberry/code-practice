@@ -1,0 +1,2 @@
+SharedLibrary('libfoo', ['lib.cpp'])
+Program('foo', ['main.cpp'], LIBS=['libfoo'], LIBPATH=['.'])
