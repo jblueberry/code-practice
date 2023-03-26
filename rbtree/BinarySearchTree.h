@@ -71,7 +71,7 @@ namespace daniel
             return true;
         }
 
-        bool Remove(T value) override
+        bool Remove(const T & value) override
         {
             auto pos = Find(value);
             if (pos == nullptr)
@@ -94,7 +94,7 @@ namespace daniel
             return size;
         }
 
-        bool Contains(T value) const override
+        bool Contains(const T &value) const override
         {
             auto pos = root;
             while (pos != nullptr)

@@ -4,27 +4,23 @@
 #include <random>
 #include "TreeUtils.h"
 
-struct NonOrderable
-{
-    int value;
-};
-
 int main()
 {
-    using Map = daniel::OrderedMap<int, std::string>;
+    using RBTree = daniel::RedBlackTree<int>;
 
-    Map map;
-    map.Put(1, "1");
-    map.Put(2, "3");
+    RBTree tree;
 
-    std::cout << map.Get(1) << std::endl;
-    std::cout << map.Get(2) << std::endl;
+    std::vector<int> values = {55, 93, 51, 28, 41, 65, 76, 85, 91, 45};
+    for (auto value : values)
+        tree.Insert(value);
 
-    map.Put(1, "hello world");
-    std::cout << map.Get(1) << std::endl;
-
-    map.Put(3, "3");
-    std::cout << map.Get(3) << std::endl;
+    // Print the tree
+    auto print = [](int &value, bool color)
+    {
+        auto color_str = color ? "R" : "B";
+        std::cout << value << color_str << "\n";
+    };
+    tree.PostOrderTraverse<decltype(print), true>(print);
 
     return 0;
 }

@@ -22,8 +22,8 @@ namespace daniel
 
     public:
         virtual bool Insert(T value) = 0;
-        virtual bool Remove(T value) = 0;
-        virtual bool Contains(T value) const = 0;
+        virtual bool Remove(const T &) = 0;
+        virtual bool Contains(const T& value) const = 0;
         virtual bool Empty() const = 0;
         virtual size_t Size() const = 0;
 

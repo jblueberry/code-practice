@@ -303,16 +303,17 @@ namespace daniel
         // TODO
         bool Remove(const T &value) override
         {
-            auto pos = Find(value);
-            if (pos == nullptr)
-                return false;
+            // auto pos = Find(value);
+            // if (pos == nullptr)
+            //     return false;
 
-            if (pos->left != nullptr && pos->right != nullptr)
-            {
-                auto successor = GetMin(pos->right);
-                pos->value = successor->value;
-                pos = successor;
-            }
+            // if (pos->left != nullptr && pos->right != nullptr)
+            // {
+            //     auto successor = GetMin(pos->right);
+            //     pos->value = successor->value;
+            //     pos = successor;
+            // }
+            return true;
         }
 
         size_t Size() const override
@@ -359,6 +360,37 @@ namespace daniel
                     return &pos->value;
             }
             return nullptr;
+        }
+
+        template <typename F, bool color>
+        void PostOrderTraverse(F f) const
+        {
+            if constexpr (color)
+            {
+                std::function<void(Pointer)> traverse = [&](auto node)
+                {
+                    if (node == nullptr)
+                        return;
+                    traverse(node->left);
+                    traverse(node->right);
+                    f(node->value, node->isRed);
+                };
+
+                traverse(root);
+            }
+            else
+            {
+                std::function<void(Pointer)> traverse = [&](auto node)
+                {
+                    if (node == nullptr)
+                        return;
+                    traverse(node->left);
+                    traverse(node->right);
+                    f(node->value);
+                };
+
+                traverse(root);
+            }
         }
     };
 

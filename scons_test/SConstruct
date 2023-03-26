@@ -1,2 +1,3 @@
-SharedLibrary('libfoo', ['lib.cpp'])
-Program('foo', ['main.cpp'], LIBS=['libfoo'], LIBPATH=['.'])
+foo = Library('libfoo', ['lib.cpp'])
+main = Object('main.o', ['main.cpp'])
+Program('main', [main, foo])
