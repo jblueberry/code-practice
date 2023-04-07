@@ -1,10 +1,7 @@
 #pragma once
 
 #include <concepts>
-#include <iostream>
-// define an interface named Application, has a pure virtual function named execute
-// What is inteface in C++?
-// An interface is a class that contains only pure virtual functions.
+#include <memory>
 
 namespace daniel
 {
@@ -26,7 +23,35 @@ namespace daniel
     class Application
     {
     public:
-        virtual Result Execute(Command) = 0;
+        virtual std::shared_ptr<Result> Execute(const Command &) = 0;
     };
 
+    class Address
+    {
+    private:
+        std::string address_;
+
+    public:
+        
+        Address(std::string address) : address_(std::move(address)) {}
+        bool operator==(const Address &other) const
+        {
+            return address_ == other.address_;
+        }
+
+        friend struct std::hash<Address>;
+    };
+}
+
+namespace std
+{
+    // hash function for Address
+    template <>
+    struct hash<daniel::Address>
+    {
+        size_t operator()(const daniel::Address &address) const
+        {
+            return std::hash<std::string>()(address.address_);
+        }
+    };
 }

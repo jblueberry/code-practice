@@ -1,4 +1,6 @@
 # binary test.cpp with C++20
 env = Environment(CXXFLAGS='-std=c++20')
 env.Program('test', 'test.cpp')
-env.Program('type_test', 'type_test.cpp')
+# env.Program('type_test', 'type_test.cpp')
+env.Program('memory_test', 'memory.cpp')
+env.Program('amo', 'amo.cpp')
