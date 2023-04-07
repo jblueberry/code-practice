@@ -3,6 +3,7 @@
 #include <string>
 #include <concepts>
 #include <unordered_map>
+#include <memory>
 
 namespace daniel
 {
@@ -10,8 +11,16 @@ namespace daniel
     template <typename T>
     concept StringConvertible = std::convertible_to<T, std::string>;
 
-    class KVStoreCommand : public Command, public Comparable<KVStoreCommand>
+    class KVStoreCommand : public Command
     {
+        template <typename T>
+            requires std::derived_from<T, KVStoreCommand>
+        friend bool operator==(const T &lhs, const KVStoreCommand &rhs)
+        {
+            if (typeid(lhs) != typeid(rhs))
+                return false;
+            return lhs == static_cast<const T &>(rhs);
+        };
     };
 
     class SingleKeyCommand : public KVStoreCommand
@@ -91,11 +100,23 @@ namespace daniel
         }
     };
 
-    class KVStoreResult : public Result
+    class KVStoreResult: public Result
     {
+    public:
+        // make this class polymorphic
+        virtual ~KVStoreResult() = default;
+        template <typename T>
+            requires std::derived_from<T, KVStoreResult>
+        friend bool operator==(const T &lhs, const KVStoreResult &rhs)
+        {
+            std::cout << "comparing " << typeid(lhs).name() << " and " << typeid(rhs).name() << std::endl;
+            if (typeid(lhs) != typeid(rhs))
+                return false;
+            return lhs == static_cast<const T &>(rhs);
+        };
     };
 
-    class GetResult : public KVStoreResult, public Comparable<KVStoreResult>
+    class GetResult : public KVStoreResult
     {
     private:
         std::string value;
@@ -115,7 +136,7 @@ namespace daniel
         }
     };
 
-    class PutOk : public KVStoreResult, public Comparable<KVStoreResult>
+    class PutOk : public KVStoreResult
     {
     public:
         bool operator==(const PutOk &other) const
@@ -124,7 +145,7 @@ namespace daniel
         }
     };
 
-    class AppendResult : public KVStoreResult, public Comparable<KVStoreResult>
+    class AppendResult : public KVStoreResult
     {
     private:
         std::string value;
@@ -144,7 +165,7 @@ namespace daniel
         }
     };
 
-    class KeyNotFound : public KVStoreResult, public Comparable<KVStoreResult>
+    class KeyNotFound : public KVStoreResult
     {
     public:
         bool operator==(const KeyNotFound &other) const
@@ -166,12 +187,12 @@ namespace daniel
             return Execute(command);
         }
 
-        KVStoreResult Execute(Get command)
+        std::unique_ptr<KVStoreResult> Execute(Get command)
         {
             auto it = store_.find(command.Key());
             if (it == store_.end())
             {
-                return KeyNotFound();
+                return std::make_unique<KeyNotFound>();
             }
             else
             {

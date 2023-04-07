@@ -68,6 +68,22 @@
         "thread": "cpp",
         "cinttypes": "cpp",
         "variant": "cpp",
-        "cassert": "cpp"
+        "cassert": "cpp",
+        "__bit_reference": "cpp",
+        "__debug": "cpp",
+        "__locale": "cpp",
+        "__mutex_base": "cpp",
+        "__nullptr": "cpp",
+        "__threading_support": "cpp",
+        "__tuple": "cpp",
+        "ios": "cpp",
+        "locale": "cpp",
+        "__bits": "cpp",
+        "__config": "cpp",
+        "__errc": "cpp",
+        "__hash_table": "cpp",
+        "__node_handle": "cpp",
+        "__split_buffer": "cpp",
+        "__string": "cpp"
     }
 }

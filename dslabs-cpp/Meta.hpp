@@ -8,32 +8,10 @@
 
 namespace daniel
 {
-    class _Comparable
-    {
-    public:
-        virtual bool operator==(const _Comparable &other) const = 0;
-    };
-
-    template <typename Derived>
-    class Comparable: public _Comparable
-    {
-    public:
-        bool operator==(const _Comparable &other) const override
-        {
-            std::cout << "comparing " << typeid(*this).name() << " and " << typeid(other).name() << std::endl;
-            if (const auto *derived = dynamic_cast<const Derived *>(&other))
-            {
-                return static_cast<const Derived *>(this)->operator==(*derived);
-            }
-            else
-            {
-                return false;
-            }
-        }
-    };
-
     class Result
     {
+    public:
+        virtual ~Result() = default;
     };
 
     class Command
@@ -48,7 +26,6 @@ namespace daniel
     class Application
     {
     public:
-
         virtual Result Execute(Command) = 0;
     };
 
