@@ -5,6 +5,16 @@
 
 namespace daniel
 {
+    class Timer
+    {
+        virtual ~Timer() = default;
+    };
+    
+    class Message
+    {
+        virtual ~Message() = default;
+    };
+
     class Result
     {
     public:
@@ -32,7 +42,6 @@ namespace daniel
         std::string address_;
 
     public:
-        
         Address(std::string address) : address_(std::move(address)) {}
         bool operator==(const Address &other) const
         {
