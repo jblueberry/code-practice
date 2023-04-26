@@ -1,0 +1,1 @@
+/usr/bin/c++ -rdynamic CMakeFiles/gtest_test.dir/gtest_test.cc.o -o gtest_test  -lgtest_main -lgtest 

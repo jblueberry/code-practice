@@ -84,6 +84,8 @@
         "__hash_table": "cpp",
         "__node_handle": "cpp",
         "__split_buffer": "cpp",
-        "__string": "cpp"
+        "__string": "cpp",
+        "any": "cpp",
+        "future": "cpp"
     }
 }
