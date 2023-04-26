@@ -1,1 +1,0 @@
-/usr/bin/c++ -rdynamic CMakeFiles/test_kv_store.dir/test_kv_store.cc.o -o test_kv_store 
